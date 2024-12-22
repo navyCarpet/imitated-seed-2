@@ -8,11 +8,12 @@ router.get(/^\/raw\/(.*)/, async(req, res) => {
 	}
 	
 	if(rev) {
-		var data = await curs.execute("select content from history where title = ? and namespace = ? and rev = ?", [doc.title, doc.namespace, rev]);
+		var data = await curs.execute("select content, secret from history where title = ? and namespace = ? and rev = ?", [doc.title, doc.namespace, rev]);
 	} else {
 		var data = await curs.execute("select content from documents where title = ? and namespace = ?", [doc.title, doc.namespace]);
 	}
 	const rawContent = data;
+	if(rev && rawContent[0].secret) return res.send(await showError(req, 'secret_rev'));
 	if(!rev) {
 		var data = await curs.execute("select rev from history where title = ? and namespace = ? order by CAST(rev AS INTEGER) desc limit 1", [doc.title, doc.namespace]);
 		if(data.length) rev = data[0].rev;

@@ -8,7 +8,7 @@ router.all(/^\/revert\/(.*)/, async (req, res, next) => {
 		return res.status(403).send(await showError(req, { code: 'permission_read', msg: aclmsg }));
 	}
 	
-	var aclmsg = await getacl(req, doc.title, doc.namespace, 'edit', 2);
+	var aclmsg = await getacl(req, doc.title, doc.namespace, 'edit', 0);
 	if(aclmsg) {
 		return res.status(403).send(await showError(req, { code: 'permission_edit', msg: aclmsg }));
 	}
@@ -23,7 +23,7 @@ router.all(/^\/revert\/(.*)/, async (req, res, next) => {
 		return res.send(await showError(req, 'document_not_found'));
 	}
 	
-	const dbdata = await curs.execute("select content, advance, flags from history where title = ? and namespace = ? and rev = ?", [doc.title, doc.namespace, rev]);
+	const dbdata = await curs.execute("select content, advance, flags, secret, troll from history where title = ? and namespace = ? and rev = ?", [doc.title, doc.namespace, rev]);
 	if(!dbdata.length) {
 		return res.send(await showError(req, 'revision_not_found'));
 	}
@@ -34,6 +34,9 @@ router.all(/^\/revert\/(.*)/, async (req, res, next) => {
 	if(req.method == 'GET' && ['move', 'delete', 'acl', 'revert'].includes(revdata.advance)) {
 		return res.send(await showError(req, 'not_revertable'));
 	}
+	
+	if(rev && revdata.secret) return res.send(await showError(req, 'secret_rev'));
+	if(rev && revdata.troll) return res.send(await showError(req, 'not_revertable'));
 	
 	var content = `
 		<form method=post>

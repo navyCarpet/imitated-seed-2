@@ -5,13 +5,15 @@ router.get(/^\/w\/(.*)/, async function viewDocument(req, res) {
 	var { rev } = req.query;
 	
 	if(rev) {
-		var rawContent = await curs.execute("select content, time from history where title = ? and namespace = ? and rev = ?", [doc.title, doc.namespace, rev]);
+		var rawContent = await curs.execute("select content, time, secret, troll from history where title = ? and namespace = ? and rev = ?", [doc.title, doc.namespace, rev]);
 		var data = rawContent;
 	} else {
 		rev = null;
 		var rawContent = await curs.execute("select content from documents where title = ? and namespace = ?", [doc.title, doc.namespace]);
 	}
 	if(rev && !rawContent.length) return res.send(await showError(req, 'revision_not_found'));
+	if(rev && rawContent[0].secret) return res.send(await showError(req, 'secret_rev'));
+	if(rev && rawContent[0].troll) return res.send(await showError(req, 'marked_troll_rev'));
 
 	var content = '';
 	var httpstat = 200;

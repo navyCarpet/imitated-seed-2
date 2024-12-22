@@ -58,7 +58,7 @@ async function init() {
 	// 만들 테이블
 	const tables = {
 		'documents': ['title', 'content', 'namespace', 'time'],
-		'history': ['title', 'namespace', 'content', 'rev', 'time', 'username', 'changes', 'log', 'iserq', 'erqnum', 'advance', 'ismember', 'edit_request_id', 'flags', 'isapi', 'loghider'],
+		'history': ['title', 'namespace', 'content', 'rev', 'time', 'username', 'changes', 'log', 'iserq', 'erqnum', 'advance', 'ismember', 'edit_request_id', 'flags', 'isapi', 'loghider', 'secret', 'troll'],
 		'namespaces': ['namespace', 'locked', 'norecent', 'file'],
 		'users': ['username', 'password', 'email'],
 		'user_settings': ['username', 'key', 'value'],
@@ -204,7 +204,7 @@ if(hostconfig.disable_file_server)
 	wiki.use('/images', express.static('images', { maxAge: 86400000 }));
 
 // 업데이트 수준
-const updatecode = '25';
+const updatecode = '26';
 
 // 보안을 위해...
 wiki.disable('x-powered-by');
@@ -552,6 +552,13 @@ wiki.use(function(req, res, next) {
 			try {
 				await curs.execute("alter table history\nADD loghider text;");
 				await curs.execute("update history set loghider = ''");
+			} catch(e) {}
+		} case 25: {
+			try {
+				await curs.execute("alter table history\nADD secret text;");
+				await curs.execute("update history set secret = ''");
+				await curs.execute("alter table history\nADD troll text;");
+				await curs.execute("update history set troll = ''");
 			} catch(e) {}
 		}
 	}

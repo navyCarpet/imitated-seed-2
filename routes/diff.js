@@ -7,12 +7,14 @@ router.get(/^\/diff\/(.*)/, async (req, res) => {
 	var aclmsg = await getacl(req, doc.title, doc.namespace, 'read', 1);
 	if(aclmsg) return res.status(403).send(await showError(req, { code: 'permission_read', msg: aclmsg }));
 	if(!rev || !oldrev || Number(rev) <= Number(oldrev)) return res.send(await showError(req, 'revision_not_found'));
-	var dbdata = await curs.execute("select content from history where title = ? and namespace = ? and rev = ?", [doc.title, doc.namespace, rev]);
+	var dbdata = await curs.execute("select content, secret from history where title = ? and namespace = ? and rev = ?", [doc.title, doc.namespace, rev]);
 	if(!dbdata.length) return res.send(await showError(req, 'revision_not_found'));
 	const revdata = dbdata[0];
-	var dbdata = await curs.execute("select content from history where title = ? and namespace = ? and rev = ?", [doc.title, doc.namespace, oldrev]);
+	if(rev && revdata.secret) return res.send(await showError(req, 'secret_rev'));
+	var dbdata = await curs.execute("select content, secret from history where title = ? and namespace = ? and rev = ?", [doc.title, doc.namespace, oldrev]);
 	if(!dbdata.length) return res.send(await showError(req, 'revision_not_found'));
 	const oldrevdata = dbdata[0];
+	if(oldrev && oldrevdata.secret) return res.send(await showError(req, 'secret_rev'));
 	const diffoutput = diff(oldrevdata.content, revdata.content, 'r' + oldrev, 'r' + rev);
 	var content = diffoutput;
 	

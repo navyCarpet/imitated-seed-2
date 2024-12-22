@@ -99,7 +99,7 @@ var perms = [
 	'hide_document_history_log', 'delete_thread', 'admin', 'editable_other_user_document', 'suspend_account', 'ipacl', 
 	'update_thread_status', 'acl', 'nsacl', 'hide_thread_comment', 'grant', 'no_force_recaptcha', 
 	'disable_two_factor_login', 'login_history', 'update_thread_document', 'update_thread_topic', 
-	'aclgroup', 'api_access', 
+	'aclgroup', 'api_access', 'hide_revision', 'mark_troll_revision'
 ];
 var disable_autoperms = ['disable_two_factor_login'];
 
@@ -109,7 +109,7 @@ if(ver('4.2.0')) perms.remove('acl');
 if(!ver('4.20.0')) perms.remove('api_access');
 if(!ver('4.4.1')) perms.remove('disable_two_factor_login');
 if(!ver('4.4.2')) perms.remove('login_history');
-if(!ver('4.22.4')) perms.remove('hide_document_history_log');
+if(!ver('4.22.4')) perms.remove('hide_document_history_log'), perms.remove('hide_revision'), perms.remove('mark_troll_revision');
 if(ver('4.18.0')) perms.remove('editable_other_user_document');
 if(!ver('4.4.3')) { perms.remove('update_thread_document'); perms.remove('update_thread_topic'); }
 if(!ver('4.0.20')) perms.push('developer', 'tribune', 'arbiter');
@@ -945,6 +945,8 @@ function fetchErrorString(code, ...params) {
 		username_format: '사용자 이름을 형식에 맞게 입력해주세요.',
 		invalid_title: '문서 이름이 올바르지 않습니다.',
 		captcha_validation_failed: 'reCAPTCHA 인증에 실패했습니다.',
+		secret_rev: '숨겨진 리비젼입니다.',
+		marked_troll_rev: '이 리비젼은 반달로 표시 되었습니다.'
 	};
 	
 	return codes[code] || code;
